@@ -1,0 +1,9 @@
+// Simple storage example
+let key = 42;
+let value = 100;
+
+// Store value at key
+storage.set(key, value);
+
+// Read back the value
+let stored = storage.get(key);

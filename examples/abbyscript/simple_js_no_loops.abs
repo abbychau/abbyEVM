@@ -1,0 +1,25 @@
+// JavaScript-like syntax test without loops (to avoid jump issues)
+let x = 42;
+
+// Array-like storage syntax
+let storage = [];
+storage[0] = x;
+storage[1] = 100;  
+storage[2] = 200;
+let value = storage[0];
+
+println("Storage operations completed");
+
+// Memory operations with array syntax
+let memory = [];
+memory[64] = 100;
+memory[65] = 150;
+let data = memory[64];
+
+println("Memory operations completed");
+
+// Direct assignment
+memory = 200;
+println("Memory assigned");
+
+println("JavaScript-like syntax test completed!");

@@ -1,0 +1,22 @@
+// Comparison: Storage vs Memory in AbbyEVM
+
+console.log("=== Storage vs Memory Demo ===");
+
+let value = 123;
+
+// STORAGE: Persistent on-chain (uses SSTORE/SLOAD opcodes)
+storage[0] = value;           // This data persists permanently
+console.log("Stored in blockchain storage");
+
+// MEMORY: Temporary (uses MSTORE/MLOAD opcodes)  
+memory[64] = value;           // This data is lost after execution
+console.log("Stored in temporary memory");
+
+// Reading back
+let fromStorage = storage[0]; // This will always be available
+let fromMemory = memory[64];  // This is only available during execution
+
+console.log("From storage:", fromStorage);
+console.log("From memory:", fromMemory);
+
+console.log("Storage = permanent, Memory = temporary");

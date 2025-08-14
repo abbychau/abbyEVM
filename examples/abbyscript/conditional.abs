@@ -1,0 +1,10 @@
+// Conditional logic example
+let x = 10;
+let y = 5;
+
+if (x > y) {
+    let diff = x - y;
+    storage.set(0, diff);
+} else {
+    storage.set(0, 0);
+}

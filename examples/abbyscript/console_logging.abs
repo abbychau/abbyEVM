@@ -1,0 +1,40 @@
+// AbbyScript Console Logging Example
+// Demonstrates console.log with variables, strings, and mixed arguments
+
+// Basic variable declarations
+let x = 5;
+let y = 7;
+let z = 0;
+
+// Test single variables
+console.log("=== Single Variable Logging ===");
+console.log(x);
+console.log(y);
+console.log(z);
+
+// Test string literals
+console.log("=== String Literals ===");
+console.log("Hello, AbbyScript!");
+console.log("Variables work now!");
+
+// Test mixed arguments (string + variable)
+console.log("=== Mixed Arguments ===");
+console.log("x is:", x);
+console.log("y =", y);
+console.log("z =", z);
+
+// Test multiple variables
+console.log("=== Multiple Variables Test ===");
+let a = 1;
+let b = 2;
+let c = 3;
+
+console.log("a:", a);
+console.log("b:", b);
+console.log("c:", c);
+
+// Test with calculations (if supported)
+let sum = 8;  // This would be a + b + c if arithmetic worked
+console.log("Sum:", sum);
+
+console.log("=== Console Logging Demo Complete ===");

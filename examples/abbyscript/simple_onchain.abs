@@ -1,0 +1,25 @@
+// Simple example: How to store variables on-chain (permanently)
+
+console.log("Storing variables on-chain...");
+
+// These variables will be stored permanently in blockchain storage
+let myBalance = 1000;
+let myLevel = 42;
+
+// Method 1: Array-like syntax (recommended)
+storage[0] = myBalance;   // Store balance at slot 0
+storage[1] = myLevel;     // Store level at slot 1
+
+console.log("Data stored on-chain!");
+
+// Read back the data to verify it's stored
+let storedBalance = storage[0];
+let storedLevel = storage[1];
+
+console.log("Balance from chain:", storedBalance);
+console.log("Level from chain:", storedLevel);
+
+// Method 2: Using storage.set() and storage.get()
+storage.set(10, 999);     // Store 999 at key 10
+let value = storage.get(10);  // Read back from key 10
+console.log("Value from storage API:", value);

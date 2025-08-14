@@ -1,0 +1,47 @@
+// Example: Storing data permanently on-chain
+// This data will persist in the blockchain storage
+
+console.log("=== On-Chain Storage Example ===");
+
+// Store different types of data on-chain
+let userBalance = 1000;
+let userLevel = 5;
+let userScore = 9999;
+
+// Store in blockchain storage (persistent)
+storage[0] = userBalance;    // Slot 0: user balance
+storage[1] = userLevel;      // Slot 1: user level  
+storage[2] = userScore;      // Slot 2: user score
+
+console.log("Stored user data on-chain");
+
+// Store configuration values
+let maxUsers = 100;
+let contractVersion = 1;
+
+storage[100] = maxUsers;     // Slot 100: max users
+storage[101] = contractVersion; // Slot 101: version
+
+// Read back all stored values to verify
+let retrievedBalance = storage[0];
+let retrievedLevel = storage[1];
+let retrievedScore = storage[2];
+let retrievedMaxUsers = storage[100];
+let retrievedVersion = storage[101];
+
+console.log("Retrieved balance:", retrievedBalance);
+console.log("Retrieved level:", retrievedLevel);
+console.log("Retrieved score:", retrievedScore);
+console.log("Retrieved max users:", retrievedMaxUsers);
+console.log("Retrieved version:", retrievedVersion);
+
+// Example: Using calculated storage slots
+let userId = 12345;
+let userDataSlot = 1000 + userId; // Calculate unique slot for this user
+
+storage[userDataSlot] = userBalance; // Store user-specific data
+let userSpecificData = storage[userDataSlot];
+
+console.log("User", userId, "balance:", userSpecificData);
+
+console.log("=== All data stored permanently on blockchain ===");

@@ -1,0 +1,46 @@
+// Test JavaScript-like syntax with loops and functions (simplified)
+let x = 42;
+
+// Simple function to test recursion
+function factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+// Test storage with array syntax
+let storage = [];
+storage[0] = x;
+storage[1] = 100;
+storage[2] = 200;
+let value = storage[0];
+
+println("Storage operations completed");
+
+// Test memory with array syntax  
+let memory = [];
+memory[64] = 100;
+memory[65] = 150;
+let data = memory[64];
+
+println("Memory operations completed");
+
+// Test loop with storage
+let i = 0;
+while (i < 3) {
+    storage[i + 10] = i * 10;
+    i = i + 1;
+}
+
+println("Loop operations completed");
+
+// Test function calls
+let fact5 = factorial(5);
+println("Factorial calculated");
+
+// Test implicit memory assignment
+memory = 200;
+println("Memory assigned");
+
+println("JavaScript-like syntax test completed!");

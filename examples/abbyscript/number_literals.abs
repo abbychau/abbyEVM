@@ -1,0 +1,26 @@
+// AbbyScript Number Literals Test
+// Tests different ways to output numbers
+
+// Direct number literals (compile-time conversion)
+console.log("=== Direct Number Literals ===");
+console.log(0);
+console.log(1);
+console.log(5);
+console.log(7);
+console.log(9);
+
+// Variable numbers (runtime conversion)
+console.log("=== Variable Numbers ===");
+let a = 0;
+let b = 1; 
+let c = 5;
+let d = 7;
+let e = 9;
+
+console.log("a:", a);
+console.log("b:", b);
+console.log("c:", c); 
+console.log("d:", d);
+console.log("e:", e);
+
+console.log("Number literals test complete!");

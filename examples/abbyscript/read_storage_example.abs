@@ -1,0 +1,35 @@
+// Correct ways to read storage from chain
+
+console.log("=== Reading Storage From Chain ===");
+
+// Method 1: Direct storage array access (RECOMMENDED)
+let valueFromSlot0 = storage[0];    // Reads from chain storage slot 0
+let valueFromSlot1 = storage[1];    // Reads from chain storage slot 1
+let valueFromSlot10 = storage[10];  // Reads from chain storage slot 10
+
+console.log("Value from slot 0:", valueFromSlot0);
+console.log("Value from slot 1:", valueFromSlot1);
+console.log("Value from slot 10:", valueFromSlot10);
+
+// Method 2: Using storage.get() API
+let apiValue0 = storage.get(0);     // Same as storage[0]
+let apiValue1 = storage.get(1);     // Same as storage[1]
+
+console.log("API read slot 0:", apiValue0);
+console.log("API read slot 1:", apiValue1);
+
+// First store some values to demonstrate
+console.log("=== Storing Values First ===");
+storage[0] = 42;
+storage[1] = 100;
+storage[10] = 999;
+
+// Now read them back
+console.log("=== Reading Back Stored Values ===");
+let readBack0 = storage[0];
+let readBack1 = storage[1];
+let readBack10 = storage[10];
+
+console.log("Read back from slot 0:", readBack0);
+console.log("Read back from slot 1:", readBack1);
+console.log("Read back from slot 10:", readBack10);

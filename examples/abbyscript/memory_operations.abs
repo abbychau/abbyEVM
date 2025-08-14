@@ -1,0 +1,27 @@
+// AbbyScript Memory Operations Example
+// Demonstrates memory and storage operations with array-like syntax
+
+// Basic variable
+let x = 42;
+
+// Test storage with array syntax
+console.log("=== Storage Operations ===");
+// DON'T declare storage as a variable - it's a built-in keyword!
+storage[0] = x;        // ✅ Correct: writes to blockchain storage slot 0
+storage[1] = 100;      // ✅ Correct: writes to blockchain storage slot 1
+let value = storage[0]; // ✅ Correct: reads from blockchain storage slot 0
+
+console.log("Stored value:", value);
+
+// Test memory with array syntax  
+console.log("=== Memory Operations ===");
+// DON'T declare memory as a variable - it's a built-in keyword!
+memory[64] = 100;     // ✅ Correct: writes to memory offset 64
+let data = memory[64]; // ✅ Correct: reads from memory offset 64
+
+console.log("Memory data:", data);
+
+// Test implicit memory assignment
+memory = 200;
+
+console.log("Memory operations test complete!");

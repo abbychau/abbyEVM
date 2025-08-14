@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo index
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Check formatting
+      run: cargo fmt -- --check
+
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Build
+      run: cargo build --release --verbose
+
+    - name: Test examples
+      run: |
+        cargo run --release -- execute --example simple-add
+        cargo run --release -- execute --example simple-mul
+        cargo run --release -- analyze --bytecode "6001600201"
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Run integration tests
+      run: |
+        # Test CLI interface
+        cargo build --release
+        
+        # Test file execution
+        echo "6001600201" > test_bytecode.bin
+        cargo run --release -- execute --file test_bytecode.bin
+        
+        # Test verbose mode
+        cargo run --release -- execute --bytecode "6001600201" --verbose
+        
+        # Test gas limit
+        cargo run --release -- execute --bytecode "6001600201" --gas-limit 100
+        
+        # Test analysis
+        cargo run --release -- analyze --bytecode "6002600302"
+        
+        # Test examples listing
+        cargo run --release -- examples --list
