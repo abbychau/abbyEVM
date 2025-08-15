@@ -1,46 +1,11 @@
 # AbbyEVM & AbbyScript
 
-A simple Ethereum Virtual Machine implementation in Rust with a JavaScript-like programming language.
+<img width="930" height="613" alt="image" src="https://github.com/user-attachments/assets/cd9c52ab-658b-428c-b855-7fbb259c0f96" />
+
+
+AbbyEVM, A simple Ethereum Virtual Machine implementation in Rust with a JavaScript-like programming language.
 
 [AbbyScript](./examples/abbyscript/) is a high-level language designed for writing smart contracts on the Ethereum blockchain. It provides a familiar syntax for JavaScript developers while abstracting away the complexities of EVM bytecode.
-
-## What is this?
-
-AbbyEVM lets you run Ethereum bytecode and write smart contract logic using AbbyScript, a language that looks like JavaScript but compiles to EVM bytecode.
-
-## Features
-
-- **EVM execution**: Run bytecode with proper gas metering and state management
-- **AbbyScript compiler**: Write code that looks like JavaScript, get EVM bytecode
-- **Interactive CLI**: Test bytecode and explore the EVM interactively
-- **Verbose tracing**: See exactly what happens during execution
-
-## Getting Started
-
-Build and run:
-```bash
-git clone https://github.com/user/abbyevm.git
-cd abbyevm
-cargo build --release
-```
-
-Run some bytecode:
-```bash
-# Execute bytecode directly
-cargo run -- execute --bytecode "6001600201" --verbose
-
-# Run an example
-cargo run -- execute --example simple-add
-```
-
-Compile and run AbbyScript:
-```bash
-# From file
-cargo run -- compile --file examples/abbyscript/arithmetic.abs --run
-
-# From expression
-cargo run -- compile --expression "let x = 42; storage[0] = x;" --run
-```
 
 ## AbbyScript Language
 
@@ -75,18 +40,7 @@ function add(a, b) {
 let sum = add(5, 3);
 ```
 
-## Examples
-
-Check out the `examples/` directory:
-
-- **EVM bytecode examples**: `simple_add.bin`, `simple_mul.bin`, `storage.bin`
-- **AbbyScript examples**: 
-  - `arithmetic.abs` - Basic math
-  - `storage.abs` - Storage operations  
-  - `conditional.abs` - If/else logic
-  - `functions.abs` - Function definitions
-
-## Development
+## Try
 
 ```bash
 # Build
@@ -110,4 +64,4 @@ The EVM implementation supports most opcodes including arithmetic, logic, memory
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+MIT License
