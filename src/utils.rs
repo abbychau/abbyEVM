@@ -3,7 +3,11 @@ use ethereum_types::U256;
 /// Convert bytes to U256, padding with zeros if necessary
 pub fn bytes_to_u256(bytes: &[u8]) -> U256 {
     let mut padded = [0u8; 32];
-    let start = if bytes.len() > 32 { 0 } else { 32 - bytes.len() };
+    let start = if bytes.len() > 32 {
+        0
+    } else {
+        32 - bytes.len()
+    };
     let end = start + bytes.len().min(32);
     padded[start..end].copy_from_slice(&bytes[..bytes.len().min(32)]);
     U256::from_big_endian(&padded)
@@ -68,7 +72,7 @@ mod tests {
         assert!(safe_resize(&mut vec, 5, 10).is_ok());
         assert_eq!(vec.len(), 5);
         assert_eq!(vec, vec![1, 2, 3, 0, 0]);
-        
+
         let mut vec2 = vec![1, 2, 3];
         assert!(safe_resize(&mut vec2, 15, 10).is_err());
     }
@@ -77,7 +81,7 @@ mod tests {
     fn test_format_hex() {
         let value = U256::from(0x123456);
         assert_eq!(format_hex_u256(value), "0x123456");
-        
+
         let bytes = vec![0x12, 0x34, 0x56];
         assert_eq!(format_hex_bytes(&bytes), "0x123456");
     }

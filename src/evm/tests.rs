@@ -10,9 +10,9 @@ mod tests {
         // PUSH1 0x01, PUSH1 0x02, ADD
         let bytecode = hex::decode("6001600201").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
         assert!(result.gas_used > U256::zero());
         // Note: The result should be on the stack, but we don't return stack state
@@ -24,9 +24,9 @@ mod tests {
         // PUSH1 0x02, PUSH1 0x03, MUL
         let bytecode = hex::decode("6002600302").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
         assert!(result.gas_used > U256::zero());
     }
@@ -36,9 +36,9 @@ mod tests {
         // PUSH1 0x01, PUSH1 0x00, SSTORE, PUSH1 0x00, SLOAD
         let bytecode = hex::decode("6001600055600054").unwrap();
         let mut executor = EvmExecutor::new(10000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
         assert!(result.gas_used > U256::zero());
     }
@@ -48,9 +48,9 @@ mod tests {
         // Simple addition but with very low gas limit
         let bytecode = hex::decode("6001600201").unwrap();
         let mut executor = EvmExecutor::new(5); // Very low gas limit
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::OutOfGas);
     }
 
@@ -59,11 +59,11 @@ mod tests {
         // PUSH1 0xFF, JUMP (jump to invalid destination)
         let bytecode = hex::decode("60FF56").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         match result.status {
-            ExecutionStatus::Error(_) => {}, // Expected
+            ExecutionStatus::Error(_) => {} // Expected
             _ => panic!("Expected error for invalid jump"),
         }
     }
@@ -73,11 +73,11 @@ mod tests {
         // ADD without enough items on stack
         let bytecode = hex::decode("01").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         match result.status {
-            ExecutionStatus::Error(_) => {}, // Expected
+            ExecutionStatus::Error(_) => {} // Expected
             _ => panic!("Expected error for stack underflow"),
         }
     }
@@ -87,14 +87,14 @@ mod tests {
         // PUSH1 0x42, PUSH1 0x00, MSTORE, PUSH1 0x20, PUSH1 0x00, RETURN
         let bytecode = hex::decode("60426000526020600050f3").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         // The issue is that f3 is not the correct opcode for RETURN
         // Let's just test that it executes without crashing
         match result.status {
-            ExecutionStatus::Success => {},
-            ExecutionStatus::Error(_) => {}, // Also acceptable for this test
+            ExecutionStatus::Success => {}
+            ExecutionStatus::Error(_) => {} // Also acceptable for this test
             _ => panic!("Unexpected status: {:?}", result.status),
         }
     }
@@ -104,11 +104,11 @@ mod tests {
         // PUSH1 0x00, PUSH1 0x00, REVERT
         let bytecode = hex::decode("60006000fd").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         match result.status {
-            ExecutionStatus::Revert(_) => {}, // Expected
+            ExecutionStatus::Revert(_) => {} // Expected
             _ => panic!("Expected revert status"),
         }
     }
@@ -118,9 +118,9 @@ mod tests {
         // PUSH1 0x42, PUSH1 0x00, MSTORE, PUSH1 0x00, MLOAD
         let bytecode = hex::decode("6042600052600051").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
         assert!(result.gas_used > U256::zero());
     }
@@ -130,9 +130,9 @@ mod tests {
         // PUSH1 0x05, PUSH1 0x03, LT (3 < 5 should be true = 1)
         let bytecode = hex::decode("6005600310").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
     }
 
@@ -141,9 +141,9 @@ mod tests {
         // PUSH1 0xFF, PUSH1 0x0F, AND
         let bytecode = hex::decode("60FF600F16").unwrap();
         let mut executor = EvmExecutor::new(1000);
-        
+
         let result = executor.execute(&bytecode, 0, false).unwrap();
-        
+
         assert_eq!(result.status, ExecutionStatus::Success);
     }
 }

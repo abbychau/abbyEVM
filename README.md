@@ -62,6 +62,12 @@ RUST_LOG=debug cargo run -- execute --example simple-add
 
 The EVM implementation supports most opcodes including arithmetic, logic, memory, storage, and control flow operations.
 
+## Blockchain
+
+AbbyEVM includes a simple blockchain implementation that allows users to deploy and interact with smart contracts. The blockchain is designed to be lightweight and easy to use, making it ideal for educational purposes.
+
+[Documentation](./BLOCKCHAIN.md)
+
 ## License
 
 MIT License

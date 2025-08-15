@@ -57,7 +57,9 @@ impl EvmState {
     }
 
     pub fn pop_stack(&mut self) -> Result<Word, String> {
-        self.stack.pop().ok_or_else(|| "Stack underflow".to_string())
+        self.stack
+            .pop()
+            .ok_or_else(|| "Stack underflow".to_string())
     }
 
     pub fn peek_stack(&self, index: usize) -> Result<Word, String> {
@@ -142,19 +144,28 @@ impl EvmExecutor {
         }
     }
 
-    pub fn execute(&mut self, bytecode: &[u8], value: u64, verbose: bool) -> Result<ExecutionResult, anyhow::Error> {
+    pub fn execute(
+        &mut self,
+        bytecode: &[u8],
+        value: u64,
+        verbose: bool,
+    ) -> Result<ExecutionResult, anyhow::Error> {
         let mut state = EvmState::new(self.gas_limit, U256::from(value));
         let initial_gas = state.gas;
 
         if verbose {
-            println!("🚀 Starting execution with {} bytes of bytecode", bytecode.len());
+            println!(
+                "🚀 Starting execution with {} bytes of bytecode",
+                bytecode.len()
+            );
             println!("💰 Value: {} wei", value);
             println!("⛽ Gas limit: {}", self.gas_limit);
             println!();
         }
 
         let mut step_count = 0;
-        while state.pc < bytecode.len() && !state.halted && !state.reverted && state.error.is_none() {
+        while state.pc < bytecode.len() && !state.halted && !state.reverted && state.error.is_none()
+        {
             if verbose {
                 step_count += 1;
                 println!("Step {}: PC={}, Gas={}", step_count, state.pc, state.gas);
@@ -227,33 +238,33 @@ impl EvmExecutor {
     ) -> Result<ExecutionResult, String> {
         // Get sender account
         let sender_account = accounts.entry(tx.from).or_default();
-        
+
         // Check balance (simplified - in a real implementation, this would be more complex)
         if sender_account.balance < tx.value {
             return Err("Insufficient balance".to_string());
         }
-        
+
         // Deduct value from sender
         sender_account.balance -= tx.value;
         sender_account.nonce += ethereum_types::U256::one();
-        
+
         // Create EVM state
         let mut state = EvmState::new(tx.gas, tx.value);
         state.caller = tx.from;
         state.origin = tx.from;
         state.call_data = tx.data.clone();
-        
+
         let initial_gas = state.gas;
-        
+
         // Determine execution path
         let result = if let Some(to_address) = tx.to {
             // Call existing contract or transfer
             state.address = to_address;
-            
+
             // Get recipient account
             let recipient_account = accounts.entry(to_address).or_default();
             recipient_account.balance += tx.value;
-            
+
             // If recipient has code, execute it
             if !recipient_account.code.is_empty() {
                 let bytecode = recipient_account.code.clone();
@@ -273,38 +284,43 @@ impl EvmExecutor {
             // Contract creation
             let contract_address = self.create_contract_address(&tx.from, &sender_account.nonce);
             state.address = contract_address;
-            
+
             // Execute constructor code
             let result = self.execute_bytecode(&tx.data, &mut state)?;
-            
+
             // Store contract code if successful
             if matches!(result.status, ExecutionStatus::Success) {
                 let contract_account = accounts.entry(contract_address).or_default();
                 contract_account.code = result.return_data.clone();
                 contract_account.balance += tx.value;
             }
-            
+
             result
         };
-        
+
         Ok(result)
     }
-    
+
     fn execute_bytecode(
         &self,
         bytecode: &[u8],
         state: &mut EvmState,
     ) -> Result<ExecutionResult, String> {
         let initial_gas = state.gas;
-        
-        while state.pc < bytecode.len() && !state.halted && !state.reverted && state.error.is_none() {
+
+        while state.pc < bytecode.len() && !state.halted && !state.reverted && state.error.is_none()
+        {
             let opcode_byte = bytecode[state.pc];
             let opcode = crate::opcodes::OpCode::from_byte(opcode_byte);
-            
+
             // Execute the opcode
             match crate::opcodes::execute_opcode(&opcode, state, bytecode) {
                 Ok(_) => {
-                    if !matches!(opcode, crate::opcodes::OpCode::JUMP | crate::opcodes::OpCode::JUMPI) && !state.halted {
+                    if !matches!(
+                        opcode,
+                        crate::opcodes::OpCode::JUMP | crate::opcodes::OpCode::JUMPI
+                    ) && !state.halted
+                    {
                         state.pc += 1;
                     }
                 }
@@ -314,9 +330,9 @@ impl EvmExecutor {
                 }
             }
         }
-        
+
         let gas_used = initial_gas - state.gas;
-        
+
         let status = if let Some(error) = &state.error {
             if error.contains("Out of gas") {
                 ExecutionStatus::OutOfGas
@@ -328,7 +344,7 @@ impl EvmExecutor {
         } else {
             ExecutionStatus::Success
         };
-        
+
         Ok(ExecutionResult {
             status,
             gas_used,
@@ -338,17 +354,17 @@ impl EvmExecutor {
             state_changes: HashMap::new(), // TODO: Track state changes
         })
     }
-    
+
     fn create_contract_address(&self, sender: &Address, nonce: &ethereum_types::U256) -> Address {
         use sha3::{Digest, Keccak256};
-        
+
         let mut hasher = Keccak256::new();
         hasher.update(sender.as_bytes());
-        
+
         let mut nonce_bytes = [0u8; 32];
         nonce.to_big_endian(&mut nonce_bytes);
         hasher.update(nonce_bytes);
-        
+
         let hash = hasher.finalize();
         Address::from_slice(&hash[12..])
     }

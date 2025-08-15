@@ -47,7 +47,11 @@ impl std::fmt::Display for Log {
             f,
             "Log{{ address: {}, topics: [{}], data: 0x{} }}",
             self.address,
-            self.topics.iter().map(|t| format!("{}", t)).collect::<Vec<_>>().join(", "),
+            self.topics
+                .iter()
+                .map(|t| format!("{}", t))
+                .collect::<Vec<_>>()
+                .join(", "),
             hex::encode(&self.data)
         )
     }

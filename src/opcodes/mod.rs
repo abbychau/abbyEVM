@@ -10,7 +10,8 @@ fn decode_string_from_bytes(data: &[u8]) -> String {
         Ok(s) => s,
         Err(_) => {
             // If UTF-8 conversion fails, filter to ASCII printable chars
-            let filtered: Vec<u8> = data.iter()
+            let filtered: Vec<u8> = data
+                .iter()
                 .filter(|&&b| (32..=126).contains(&b)) // ASCII printable characters
                 .copied()
                 .collect();
@@ -35,7 +36,7 @@ pub enum OpCode {
     MULMOD,
     EXP,
     SIGNEXTEND,
-    
+
     // Comparison & Bitwise Logic Operations (0x10 - 0x1F)
     LT,
     GT,
@@ -51,10 +52,10 @@ pub enum OpCode {
     SHL,
     SHR,
     SAR,
-    
+
     // SHA3 (0x20)
     SHA3,
-    
+
     // Environmental Information (0x30 - 0x3F)
     ADDRESS,
     BALANCE,
@@ -72,7 +73,7 @@ pub enum OpCode {
     RETURNDATASIZE,
     RETURNDATACOPY,
     EXTCODEHASH,
-    
+
     // Block Information (0x40 - 0x4F)
     BLOCKHASH,
     COINBASE,
@@ -83,7 +84,7 @@ pub enum OpCode {
     CHAINID,
     SELFBALANCE,
     BASEFEE,
-    
+
     // Stack, Memory, Storage and Flow Operations (0x50 - 0x5F)
     POP,
     MLOAD,
@@ -97,24 +98,84 @@ pub enum OpCode {
     MSIZE,
     GAS,
     JUMPDEST,
-    
+
     // Push Operations (0x60 - 0x7F)
-    PUSH1, PUSH2, PUSH3, PUSH4, PUSH5, PUSH6, PUSH7, PUSH8,
-    PUSH9, PUSH10, PUSH11, PUSH12, PUSH13, PUSH14, PUSH15, PUSH16,
-    PUSH17, PUSH18, PUSH19, PUSH20, PUSH21, PUSH22, PUSH23, PUSH24,
-    PUSH25, PUSH26, PUSH27, PUSH28, PUSH29, PUSH30, PUSH31, PUSH32,
-    
+    PUSH1,
+    PUSH2,
+    PUSH3,
+    PUSH4,
+    PUSH5,
+    PUSH6,
+    PUSH7,
+    PUSH8,
+    PUSH9,
+    PUSH10,
+    PUSH11,
+    PUSH12,
+    PUSH13,
+    PUSH14,
+    PUSH15,
+    PUSH16,
+    PUSH17,
+    PUSH18,
+    PUSH19,
+    PUSH20,
+    PUSH21,
+    PUSH22,
+    PUSH23,
+    PUSH24,
+    PUSH25,
+    PUSH26,
+    PUSH27,
+    PUSH28,
+    PUSH29,
+    PUSH30,
+    PUSH31,
+    PUSH32,
+
     // Duplication Operations (0x80 - 0x8F)
-    DUP1, DUP2, DUP3, DUP4, DUP5, DUP6, DUP7, DUP8,
-    DUP9, DUP10, DUP11, DUP12, DUP13, DUP14, DUP15, DUP16,
-    
+    DUP1,
+    DUP2,
+    DUP3,
+    DUP4,
+    DUP5,
+    DUP6,
+    DUP7,
+    DUP8,
+    DUP9,
+    DUP10,
+    DUP11,
+    DUP12,
+    DUP13,
+    DUP14,
+    DUP15,
+    DUP16,
+
     // Exchange Operations (0x90 - 0x9F)
-    SWAP1, SWAP2, SWAP3, SWAP4, SWAP5, SWAP6, SWAP7, SWAP8,
-    SWAP9, SWAP10, SWAP11, SWAP12, SWAP13, SWAP14, SWAP15, SWAP16,
-    
+    SWAP1,
+    SWAP2,
+    SWAP3,
+    SWAP4,
+    SWAP5,
+    SWAP6,
+    SWAP7,
+    SWAP8,
+    SWAP9,
+    SWAP10,
+    SWAP11,
+    SWAP12,
+    SWAP13,
+    SWAP14,
+    SWAP15,
+    SWAP16,
+
     // Logging Operations (0xA0 - 0xA4)
-    LOG0, LOG1, LOG2, LOG3, LOG4,
-    
+    LOG0,
+    LOG1,
+    LOG2,
+    LOG3,
+    LOG4,
+
     // System Operations (0xF0 - 0xFF)
     CREATE,
     CALL,
@@ -126,7 +187,7 @@ pub enum OpCode {
     REVERT,
     INVALID,
     SELFDESTRUCT,
-    
+
     // Unknown/Invalid opcode
     UNKNOWN(u8),
 }
@@ -146,7 +207,7 @@ impl OpCode {
             0x09 => OpCode::MULMOD,
             0x0a => OpCode::EXP,
             0x0b => OpCode::SIGNEXTEND,
-            
+
             0x10 => OpCode::LT,
             0x11 => OpCode::GT,
             0x12 => OpCode::SLT,
@@ -161,9 +222,9 @@ impl OpCode {
             0x1b => OpCode::SHL,
             0x1c => OpCode::SHR,
             0x1d => OpCode::SAR,
-            
+
             0x20 => OpCode::SHA3,
-            
+
             0x30 => OpCode::ADDRESS,
             0x31 => OpCode::BALANCE,
             0x32 => OpCode::ORIGIN,
@@ -180,7 +241,7 @@ impl OpCode {
             0x3d => OpCode::RETURNDATASIZE,
             0x3e => OpCode::RETURNDATACOPY,
             0x3f => OpCode::EXTCODEHASH,
-            
+
             0x40 => OpCode::BLOCKHASH,
             0x41 => OpCode::COINBASE,
             0x42 => OpCode::TIMESTAMP,
@@ -190,7 +251,7 @@ impl OpCode {
             0x46 => OpCode::CHAINID,
             0x47 => OpCode::SELFBALANCE,
             0x48 => OpCode::BASEFEE,
-            
+
             0x50 => OpCode::POP,
             0x51 => OpCode::MLOAD,
             0x52 => OpCode::MSTORE,
@@ -203,7 +264,7 @@ impl OpCode {
             0x59 => OpCode::MSIZE,
             0x5a => OpCode::GAS,
             0x5b => OpCode::JUMPDEST,
-            
+
             0x60 => OpCode::PUSH1,
             0x61 => OpCode::PUSH2,
             0x62 => OpCode::PUSH3,
@@ -236,7 +297,7 @@ impl OpCode {
             0x7d => OpCode::PUSH30,
             0x7e => OpCode::PUSH31,
             0x7f => OpCode::PUSH32,
-            
+
             0x80 => OpCode::DUP1,
             0x81 => OpCode::DUP2,
             0x82 => OpCode::DUP3,
@@ -253,7 +314,7 @@ impl OpCode {
             0x8d => OpCode::DUP14,
             0x8e => OpCode::DUP15,
             0x8f => OpCode::DUP16,
-            
+
             0x90 => OpCode::SWAP1,
             0x91 => OpCode::SWAP2,
             0x92 => OpCode::SWAP3,
@@ -270,13 +331,13 @@ impl OpCode {
             0x9d => OpCode::SWAP14,
             0x9e => OpCode::SWAP15,
             0x9f => OpCode::SWAP16,
-            
+
             0xa0 => OpCode::LOG0,
             0xa1 => OpCode::LOG1,
             0xa2 => OpCode::LOG2,
             0xa3 => OpCode::LOG3,
             0xa4 => OpCode::LOG4,
-            
+
             0xf0 => OpCode::CREATE,
             0xf1 => OpCode::CALL,
             0xf2 => OpCode::CALLCODE,
@@ -287,7 +348,7 @@ impl OpCode {
             0xfd => OpCode::REVERT,
             0xfe => OpCode::INVALID,
             0xff => OpCode::SELFDESTRUCT,
-            
+
             _ => OpCode::UNKNOWN(byte),
         }
     }
@@ -295,21 +356,45 @@ impl OpCode {
     pub fn gas_cost(&self) -> U256 {
         match self {
             OpCode::STOP => U256::from(0),
-            OpCode::ADD | OpCode::SUB | OpCode::LT | OpCode::GT | OpCode::SLT | OpCode::SGT | 
-            OpCode::EQ | OpCode::ISZERO | OpCode::AND | OpCode::OR | OpCode::XOR | OpCode::NOT |
-            OpCode::BYTE | OpCode::SHL | OpCode::SHR | OpCode::SAR => U256::from(3),
-            
+            OpCode::ADD
+            | OpCode::SUB
+            | OpCode::LT
+            | OpCode::GT
+            | OpCode::SLT
+            | OpCode::SGT
+            | OpCode::EQ
+            | OpCode::ISZERO
+            | OpCode::AND
+            | OpCode::OR
+            | OpCode::XOR
+            | OpCode::NOT
+            | OpCode::BYTE
+            | OpCode::SHL
+            | OpCode::SHR
+            | OpCode::SAR => U256::from(3),
+
             OpCode::MUL | OpCode::DIV | OpCode::SDIV | OpCode::MOD | OpCode::SMOD => U256::from(5),
             OpCode::ADDMOD | OpCode::MULMOD => U256::from(8),
             OpCode::SIGNEXTEND => U256::from(5),
-            
+
             OpCode::SHA3 => U256::from(30),
-            
-            OpCode::ADDRESS | OpCode::ORIGIN | OpCode::CALLER | OpCode::CALLVALUE |
-            OpCode::CALLDATASIZE | OpCode::CODESIZE | OpCode::GASPRICE | OpCode::COINBASE |
-            OpCode::TIMESTAMP | OpCode::NUMBER | OpCode::DIFFICULTY | OpCode::GASLIMIT |
-            OpCode::CHAINID | OpCode::SELFBALANCE | OpCode::BASEFEE => U256::from(2),
-            
+
+            OpCode::ADDRESS
+            | OpCode::ORIGIN
+            | OpCode::CALLER
+            | OpCode::CALLVALUE
+            | OpCode::CALLDATASIZE
+            | OpCode::CODESIZE
+            | OpCode::GASPRICE
+            | OpCode::COINBASE
+            | OpCode::TIMESTAMP
+            | OpCode::NUMBER
+            | OpCode::DIFFICULTY
+            | OpCode::GASLIMIT
+            | OpCode::CHAINID
+            | OpCode::SELFBALANCE
+            | OpCode::BASEFEE => U256::from(2),
+
             OpCode::POP => U256::from(2),
             OpCode::MLOAD => U256::from(3),
             OpCode::MSTORE | OpCode::MSTORE8 => U256::from(3),
@@ -321,31 +406,80 @@ impl OpCode {
             OpCode::MSIZE => U256::from(2),
             OpCode::GAS => U256::from(2),
             OpCode::JUMPDEST => U256::from(1),
-            
+
             // PUSH operations
-            OpCode::PUSH1 | OpCode::PUSH2 | OpCode::PUSH3 | OpCode::PUSH4 | OpCode::PUSH5 |
-            OpCode::PUSH6 | OpCode::PUSH7 | OpCode::PUSH8 | OpCode::PUSH9 | OpCode::PUSH10 |
-            OpCode::PUSH11 | OpCode::PUSH12 | OpCode::PUSH13 | OpCode::PUSH14 | OpCode::PUSH15 |
-            OpCode::PUSH16 | OpCode::PUSH17 | OpCode::PUSH18 | OpCode::PUSH19 | OpCode::PUSH20 |
-            OpCode::PUSH21 | OpCode::PUSH22 | OpCode::PUSH23 | OpCode::PUSH24 | OpCode::PUSH25 |
-            OpCode::PUSH26 | OpCode::PUSH27 | OpCode::PUSH28 | OpCode::PUSH29 | OpCode::PUSH30 |
-            OpCode::PUSH31 | OpCode::PUSH32 => U256::from(3),
-            
+            OpCode::PUSH1
+            | OpCode::PUSH2
+            | OpCode::PUSH3
+            | OpCode::PUSH4
+            | OpCode::PUSH5
+            | OpCode::PUSH6
+            | OpCode::PUSH7
+            | OpCode::PUSH8
+            | OpCode::PUSH9
+            | OpCode::PUSH10
+            | OpCode::PUSH11
+            | OpCode::PUSH12
+            | OpCode::PUSH13
+            | OpCode::PUSH14
+            | OpCode::PUSH15
+            | OpCode::PUSH16
+            | OpCode::PUSH17
+            | OpCode::PUSH18
+            | OpCode::PUSH19
+            | OpCode::PUSH20
+            | OpCode::PUSH21
+            | OpCode::PUSH22
+            | OpCode::PUSH23
+            | OpCode::PUSH24
+            | OpCode::PUSH25
+            | OpCode::PUSH26
+            | OpCode::PUSH27
+            | OpCode::PUSH28
+            | OpCode::PUSH29
+            | OpCode::PUSH30
+            | OpCode::PUSH31
+            | OpCode::PUSH32 => U256::from(3),
+
             // DUP operations
-            OpCode::DUP1 | OpCode::DUP2 | OpCode::DUP3 | OpCode::DUP4 | OpCode::DUP5 |
-            OpCode::DUP6 | OpCode::DUP7 | OpCode::DUP8 | OpCode::DUP9 | OpCode::DUP10 |
-            OpCode::DUP11 | OpCode::DUP12 | OpCode::DUP13 | OpCode::DUP14 | OpCode::DUP15 |
-            OpCode::DUP16 => U256::from(3),
-            
+            OpCode::DUP1
+            | OpCode::DUP2
+            | OpCode::DUP3
+            | OpCode::DUP4
+            | OpCode::DUP5
+            | OpCode::DUP6
+            | OpCode::DUP7
+            | OpCode::DUP8
+            | OpCode::DUP9
+            | OpCode::DUP10
+            | OpCode::DUP11
+            | OpCode::DUP12
+            | OpCode::DUP13
+            | OpCode::DUP14
+            | OpCode::DUP15
+            | OpCode::DUP16 => U256::from(3),
+
             // SWAP operations
-            OpCode::SWAP1 | OpCode::SWAP2 | OpCode::SWAP3 | OpCode::SWAP4 | OpCode::SWAP5 |
-            OpCode::SWAP6 | OpCode::SWAP7 | OpCode::SWAP8 | OpCode::SWAP9 | OpCode::SWAP10 |
-            OpCode::SWAP11 | OpCode::SWAP12 | OpCode::SWAP13 | OpCode::SWAP14 | OpCode::SWAP15 |
-            OpCode::SWAP16 => U256::from(3),
-            
+            OpCode::SWAP1
+            | OpCode::SWAP2
+            | OpCode::SWAP3
+            | OpCode::SWAP4
+            | OpCode::SWAP5
+            | OpCode::SWAP6
+            | OpCode::SWAP7
+            | OpCode::SWAP8
+            | OpCode::SWAP9
+            | OpCode::SWAP10
+            | OpCode::SWAP11
+            | OpCode::SWAP12
+            | OpCode::SWAP13
+            | OpCode::SWAP14
+            | OpCode::SWAP15
+            | OpCode::SWAP16 => U256::from(3),
+
             OpCode::RETURN => U256::from(0),
             OpCode::REVERT => U256::from(0),
-            
+
             _ => U256::from(1), // Default gas cost
         }
     }
@@ -389,59 +523,63 @@ impl OpCode {
     }
 }
 
-pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) -> Result<(), String> {
+pub fn execute_opcode(
+    opcode: &OpCode,
+    state: &mut EvmState,
+    bytecode: &[u8],
+) -> Result<(), String> {
     // Consume gas
     let gas_cost = opcode.gas_cost();
     state.consume_gas(gas_cost)?;
-    
+
     match opcode {
         // Stop and Arithmetic Operations
         OpCode::STOP => {
             state.halted = true;
         }
-        
+
         OpCode::ADD => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a.overflowing_add(b).0;
             state.push_stack(result)?;
         }
-        
+
         OpCode::MUL => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a.overflowing_mul(b).0;
             state.push_stack(result)?;
         }
-        
+
         OpCode::SUB => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a.overflowing_sub(b).0;
             state.push_stack(result)?;
         }
-        
+
         OpCode::DIV => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = if b.is_zero() { U256::zero() } else { a / b };
             state.push_stack(result)?;
         }
-        
+
         OpCode::MOD => {
             let b = state.pop_stack()?; // divisor (second operand)
-            let a = state.pop_stack()?; // dividend (first operand)  
+            let a = state.pop_stack()?; // dividend (first operand)
             let result = if b.is_zero() { U256::zero() } else { a % b };
             state.push_stack(result)?;
         }
-        
+
         OpCode::EXP => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a.overflowing_pow(b).0;
             state.push_stack(result)?;
         }
-        
+
         // Comparison & Bitwise Logic Operations
         OpCode::LT => {
             let a = state.pop_stack()?;
@@ -449,54 +587,58 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             let result = if a < b { U256::one() } else { U256::zero() };
             state.push_stack(result)?;
         }
-        
+
         OpCode::GT => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = if a > b { U256::one() } else { U256::zero() };
             state.push_stack(result)?;
         }
-        
+
         OpCode::EQ => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = if a == b { U256::one() } else { U256::zero() };
             state.push_stack(result)?;
         }
-        
+
         OpCode::ISZERO => {
             let a = state.pop_stack()?;
-            let result = if a.is_zero() { U256::one() } else { U256::zero() };
+            let result = if a.is_zero() {
+                U256::one()
+            } else {
+                U256::zero()
+            };
             state.push_stack(result)?;
         }
-        
+
         OpCode::AND => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a & b;
             state.push_stack(result)?;
         }
-        
+
         OpCode::OR => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a | b;
             state.push_stack(result)?;
         }
-        
+
         OpCode::XOR => {
             let a = state.pop_stack()?;
             let b = state.pop_stack()?;
             let result = a ^ b;
             state.push_stack(result)?;
         }
-        
+
         OpCode::NOT => {
             let a = state.pop_stack()?;
             let result = !a;
             state.push_stack(result)?;
         }
-        
+
         // SHA3
         OpCode::SHA3 => {
             let offset = state.pop_stack()?.as_usize();
@@ -508,35 +650,35 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             let hash_u256 = U256::from_big_endian(&hash);
             state.push_stack(hash_u256)?;
         }
-        
+
         // Environmental Information
         OpCode::ADDRESS => {
             let addr_u256 = U256::from_big_endian(state.address.as_bytes());
             state.push_stack(addr_u256)?;
         }
-        
+
         OpCode::CALLER => {
             let caller_u256 = U256::from_big_endian(state.caller.as_bytes());
             state.push_stack(caller_u256)?;
         }
-        
+
         OpCode::CALLVALUE => {
             state.push_stack(state.value)?;
         }
-        
+
         OpCode::CALLDATASIZE => {
             state.push_stack(U256::from(state.call_data.len()))?;
         }
-        
+
         OpCode::CODESIZE => {
             state.push_stack(U256::from(bytecode.len()))?;
         }
-        
+
         // Stack, Memory, Storage and Flow Operations
         OpCode::POP => {
             state.pop_stack()?;
         }
-        
+
         OpCode::MLOAD => {
             let offset = state.pop_stack()?.as_usize();
             let data = state.memory_load(offset, 32)?;
@@ -545,7 +687,7 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             let value = U256::from_big_endian(&bytes);
             state.push_stack(value)?;
         }
-        
+
         OpCode::MSTORE => {
             let offset = state.pop_stack()?.as_usize();
             let value = state.pop_stack()?;
@@ -553,39 +695,41 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             value.to_big_endian(&mut bytes);
             state.memory_store(offset, &bytes)?;
         }
-        
+
         OpCode::MSTORE8 => {
             let offset = state.pop_stack()?.as_usize();
             let value = state.pop_stack()?;
             let byte = (value.low_u64() & 0xFF) as u8;
             state.memory_store(offset, &[byte])?;
         }
-        
+
         OpCode::SLOAD => {
             let key = state.pop_stack()?;
             let value = state.storage_load(&key);
             state.push_stack(value)?;
         }
-        
+
         OpCode::SSTORE => {
             let key = state.pop_stack()?;
             let value = state.pop_stack()?;
             state.storage_store(key, value);
         }
-        
+
         OpCode::JUMP => {
             let dest = state.pop_stack()?.as_usize();
-            if dest >= bytecode.len() || bytecode[dest] != 0x5b { // 0x5b is JUMPDEST
+            if dest >= bytecode.len() || bytecode[dest] != 0x5b {
+                // 0x5b is JUMPDEST
                 return Err("Invalid jump destination".to_string());
             }
             state.pc = dest;
         }
-        
+
         OpCode::JUMPI => {
             let dest = state.pop_stack()?.as_usize();
             let condition = state.pop_stack()?;
             if !condition.is_zero() {
-                if dest >= bytecode.len() || bytecode[dest] != 0x5b { // 0x5b is JUMPDEST
+                if dest >= bytecode.len() || bytecode[dest] != 0x5b {
+                    // 0x5b is JUMPDEST
                     return Err("Invalid jump destination".to_string());
                 }
                 state.pc = dest;
@@ -593,39 +737,39 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
                 state.pc += 1; // Continue to next instruction
             }
         }
-        
+
         OpCode::PC => {
             state.push_stack(U256::from(state.pc))?;
         }
-        
+
         OpCode::MSIZE => {
             state.push_stack(U256::from(state.memory.len()))?;
         }
-        
+
         OpCode::GAS => {
             state.push_stack(state.gas)?;
         }
-        
+
         OpCode::JUMPDEST => {
             // JUMPDEST is a no-op, just marks valid jump destinations
         }
-        
+
         // Push Operations
         push_op if push_op.push_size().is_some() => {
             let size = push_op.push_size().unwrap();
             if state.pc + size >= bytecode.len() {
                 return Err("Push instruction exceeds bytecode length".to_string());
             }
-            
+
             let mut bytes = vec![0u8; 32]; // U256 is 32 bytes
             let start_idx = 32 - size;
             bytes[start_idx..].copy_from_slice(&bytecode[state.pc + 1..state.pc + 1 + size]);
-            
+
             let value = U256::from_big_endian(&bytes);
             state.push_stack(value)?;
             state.pc += size; // Skip the pushed bytes
         }
-        
+
         // DUP Operations
         OpCode::DUP1 => state.dup_stack(1)?,
         OpCode::DUP2 => state.dup_stack(2)?,
@@ -643,7 +787,7 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
         OpCode::DUP14 => state.dup_stack(14)?,
         OpCode::DUP15 => state.dup_stack(15)?,
         OpCode::DUP16 => state.dup_stack(16)?,
-        
+
         // SWAP Operations
         OpCode::SWAP1 => state.swap_stack(1)?,
         OpCode::SWAP2 => state.swap_stack(2)?,
@@ -661,7 +805,7 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
         OpCode::SWAP14 => state.swap_stack(14)?,
         OpCode::SWAP15 => state.swap_stack(15)?,
         OpCode::SWAP16 => state.swap_stack(16)?,
-        
+
         // System Operations
         OpCode::RETURN => {
             let offset = state.pop_stack()?.as_usize();
@@ -669,34 +813,34 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             state.return_data = state.memory_load(offset, size)?;
             state.halted = true;
         }
-        
+
         OpCode::REVERT => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
             state.return_data = state.memory_load(offset, size)?;
             state.reverted = true;
         }
-        
+
         // Log Operations
         OpCode::LOG0 => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
             let data = state.memory_load(offset, size)?;
-            
+
             // Decode and display the string content
             let message = decode_string_from_bytes(&data);
             println!("console.log: {}", message);
         }
-        
+
         OpCode::LOG1 => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
             let topic1 = state.pop_stack()?;
             let data = state.memory_load(offset, size)?;
-            
+
             // Decode the string content
             let message = decode_string_from_bytes(&data);
-            
+
             // Different output based on topic (1=warn, 2=error)
             match topic1.as_u64() {
                 1 => println!("console.warn: {}", message),
@@ -704,18 +848,18 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
                 _ => println!("console (topic {}): {}", topic1, message),
             }
         }
-        
+
         OpCode::LOG2 => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
             let topic2 = state.pop_stack()?;
             let topic1 = state.pop_stack()?;
             let data = state.memory_load(offset, size)?;
-            
+
             let message = decode_string_from_bytes(&data);
             println!("LOG2 (topics: {}, {}): {}", topic1, topic2, message);
         }
-        
+
         OpCode::LOG3 => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
@@ -723,11 +867,14 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             let topic2 = state.pop_stack()?;
             let topic1 = state.pop_stack()?;
             let data = state.memory_load(offset, size)?;
-            
+
             let message = decode_string_from_bytes(&data);
-            println!("LOG3 (topics: {}, {}, {}): {}", topic1, topic2, topic3, message);
+            println!(
+                "LOG3 (topics: {}, {}, {}): {}",
+                topic1, topic2, topic3, message
+            );
         }
-        
+
         OpCode::LOG4 => {
             let offset = state.pop_stack()?.as_usize();
             let size = state.pop_stack()?.as_usize();
@@ -736,16 +883,19 @@ pub fn execute_opcode(opcode: &OpCode, state: &mut EvmState, bytecode: &[u8]) ->
             let topic2 = state.pop_stack()?;
             let topic1 = state.pop_stack()?;
             let data = state.memory_load(offset, size)?;
-            
+
             let message = decode_string_from_bytes(&data);
-            println!("LOG4 (topics: {}, {}, {}, {}): {}", topic1, topic2, topic3, topic4, message);
+            println!(
+                "LOG4 (topics: {}, {}, {}, {}): {}",
+                topic1, topic2, topic3, topic4, message
+            );
         }
-        
+
         // Unimplemented opcodes
         _ => {
             return Err(format!("Unimplemented opcode: {:?}", opcode));
         }
     }
-    
+
     Ok(())
 }
