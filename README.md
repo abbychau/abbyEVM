@@ -1,6 +1,6 @@
 # AbbyEVM & AbbyScript
 
-<img width="971" height="616" alt="image" src="https://github.com/user-attachments/assets/9e360ba0-0bbd-400e-9dd2-c47ad9f52f0c" />
+<img width="930" height="613" alt="image" src="https://github.com/user-attachments/assets/cd9c52ab-658b-428c-b855-7fbb259c0f96" />
 
 
 AbbyEVM, A simple Ethereum Virtual Machine implementation in Rust with a JavaScript-like programming language.
