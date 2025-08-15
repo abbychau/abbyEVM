@@ -8,6 +8,7 @@ use parser::Parser;
 use codegen::CodeGenerator;
 
 #[derive(Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum CompilerError {
     LexError(lexer::LexError),
     ParseError(parser::ParseError),

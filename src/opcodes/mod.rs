@@ -11,7 +11,7 @@ fn decode_string_from_bytes(data: &[u8]) -> String {
         Err(_) => {
             // If UTF-8 conversion fails, filter to ASCII printable chars
             let filtered: Vec<u8> = data.iter()
-                .filter(|&&b| b >= 32 && b <= 126) // ASCII printable characters
+                .filter(|&&b| (32..=126).contains(&b)) // ASCII printable characters
                 .copied()
                 .collect();
             String::from_utf8_lossy(&filtered).to_string()
@@ -20,6 +20,7 @@ fn decode_string_from_bytes(data: &[u8]) -> String {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum OpCode {
     // Stop and Arithmetic Operations (0x00 - 0x0F)
     STOP,

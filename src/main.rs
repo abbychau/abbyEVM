@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 use colored::Colorize;
 use std::path::PathBuf;
 
+mod blockchain;
 mod cli;
 mod compiler;
 mod evm;
@@ -10,6 +11,7 @@ mod opcodes;
 mod types;
 mod utils;
 
+use blockchain::AbbyNode;
 use cli::*;
 use compiler::Compiler;
 use evm::{EvmExecutor};
@@ -95,6 +97,29 @@ enum Commands {
         verbose: bool,
     },
     
+    /// Start AbbyEVM blockchain node
+    Node {
+        /// Network port for P2P communication
+        #[arg(short, long, default_value = "30303")]
+        port: u16,
+        
+        /// Validator address (if this node should participate in consensus)
+        #[arg(short, long)]
+        validator: Option<String>,
+        
+        /// Peer addresses to connect to
+        #[arg(short = 'c', long)]
+        connect: Vec<String>,
+        
+        /// Database path for persistent storage (default: ~/.ABBYCHAIN)
+        #[arg(short, long)]
+        db_path: Option<PathBuf>,
+        
+        /// Enable mining (validator mode)
+        #[arg(short, long)]
+        mine: bool,
+    },
+    
     /// List and run example contracts
     Examples {
         /// List available examples
@@ -111,6 +136,11 @@ enum Commands {
 }
 
 fn main() -> Result<()> {
+    let rt = tokio::runtime::Runtime::new()?;
+    rt.block_on(async_main())
+}
+
+async fn async_main() -> Result<()> {
     env_logger::init();
     
     let cli = Cli::parse();
@@ -133,6 +163,9 @@ fn main() -> Result<()> {
         Commands::Interactive { verbose } => {
             let _final_verbose = cli.verbose || verbose;
             interactive_mode()?;
+        }
+        Commands::Node { port, validator, connect, db_path, mine } => {
+            node_command(port, validator, connect, db_path, mine).await?;
         }
         Commands::Examples { list } => {
             examples_command(list)?;
@@ -300,4 +333,107 @@ fn compile_command(
     }
     
     Ok(())
+}
+
+async fn node_command(
+    port: u16,
+    validator: Option<String>,
+    connect_peers: Vec<String>,
+    db_path: Option<PathBuf>,
+    mine: bool,
+) -> Result<()> {
+    use ethereum_types::Address;
+    
+    println!("{}", "🌐 Starting AbbyEVM Blockchain Node".bright_cyan().bold());
+    println!("{}", "═".repeat(35).bright_blue());
+    
+    // Parse validator address if provided
+    let validator_address = if let Some(addr_str) = validator {
+        if addr_str.starts_with("0x") {
+            Some(addr_str.parse::<Address>().map_err(|_| {
+                anyhow::anyhow!("Invalid validator address format")
+            })?)
+        } else {
+            Some(format!("0x{}", addr_str).parse::<Address>().map_err(|_| {
+                anyhow::anyhow!("Invalid validator address format")
+            })?)
+        }
+    } else if mine {
+        // Generate a random validator address for mining
+        Some(Address::random())
+    } else {
+        None
+    };
+    
+    // Handle database path with default to ~/.ABBYCHAIN
+    let db_path_str = if let Some(path) = db_path {
+        path.to_str().unwrap_or("~/.ABBYCHAIN").to_string()
+    } else {
+        // Default to ~/.ABBYCHAIN
+        let home_dir = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        format!("{}/.ABBYCHAIN", home_dir)
+    };
+    
+    // Create the database directory if it doesn't exist
+    if let Ok(expanded_path) = std::fs::canonicalize(&db_path_str) {
+        // Path exists, use it as-is
+    } else {
+        // Path doesn't exist, create it
+        if let Err(e) = std::fs::create_dir_all(&db_path_str) {
+            log::warn!("Failed to create database directory {}: {}", db_path_str, e);
+        }
+    }
+    
+    // Initialize node
+    println!("Initializing node on port {}...", port);
+    println!("Database path: {}", db_path_str);
+    if let Some(addr) = validator_address {
+        println!("Validator address: {}", addr);
+    }
+    
+    let node = AbbyNode::new(validator_address, port, Some(&db_path_str)).await
+        .map_err(|e| anyhow::anyhow!("Failed to create node: {}", e))?;
+    
+    // Connect to peers
+    for peer_addr in connect_peers {
+        println!("Connecting to peer: {}", peer_addr);
+        if let Err(e) = node.connect_to_peer(&peer_addr).await {
+            log::warn!("Failed to connect to peer {}: {}", peer_addr, e);
+        }
+    }
+    
+    // Start the node
+    println!("Starting blockchain node...");
+    node.start().await
+        .map_err(|e| anyhow::anyhow!("Failed to start node: {}", e))?;
+    
+    // Display node info
+    let (chain_length, head_hash, block_count, abby_supply) = node.get_blockchain_info().await;
+    println!("\n{}", "📊 Node Status".bright_green().bold());
+    println!("Chain length: {} blocks", chain_length);
+    println!("Head hash: {}", head_hash);
+    println!("Total Abby supply: {} tokens", format_abby_amount(abby_supply));
+    println!("Connected peers: {}", node.get_peer_count().await);
+    
+    if mine && validator_address.is_some() {
+        println!("\n{}", "⛏️  Mining enabled".bright_yellow().bold());
+    }
+    
+    // Keep the node running
+    println!("\n{}", "Node is running... Press Ctrl+C to stop".bright_green());
+    
+    // Set up signal handling
+    tokio::signal::ctrl_c().await
+        .map_err(|e| anyhow::anyhow!("Failed to listen for ctrl-c: {}", e))?;
+    
+    println!("\nShutting down node...");
+    Ok(())
+}
+
+fn format_abby_amount(amount: ethereum_types::U256) -> String {
+    let decimals = ethereum_types::U256::from(1_000_000_000_000_000_000u64); // 18 decimals
+    let whole = amount / decimals;
+    let fractional = (amount % decimals) / ethereum_types::U256::from(1_000_000_000_000u64); // Show 6 decimal places
+    
+    format!("{}.{:06}", whole, fractional.as_u64())
 }

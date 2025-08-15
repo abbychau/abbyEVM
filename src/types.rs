@@ -1,4 +1,5 @@
 use ethereum_types::{Address, H256, U256};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub type Bytes = Vec<u8>;
@@ -33,7 +34,7 @@ pub struct Transaction {
     pub data: Bytes,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Log {
     pub address: Address,
     pub topics: Vec<H256>,

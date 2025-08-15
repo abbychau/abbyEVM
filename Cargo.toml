@@ -30,6 +30,24 @@ log = "0.4"
 colored = "2.0"
 indicatif = "0.17"
 
+# Async runtime and networking
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = "0.7"
+futures = "0.3"
+
+# Networking
+libp2p = { version = "0.53", features = ["tcp", "noise", "yamux", "gossipsub", "identify", "ping", "macros"] }
+
+# Database and persistence
+sled = "0.34"
+
+# Time utilities
+chrono = { version = "0.4", features = ["serde"] }
+
+# Additional crypto
+rand = "0.8"
+ed25519-dalek = "2.0"
+
 [dev-dependencies]
 tokio-test = "0.4"
 

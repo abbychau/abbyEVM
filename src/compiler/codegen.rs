@@ -1,19 +1,7 @@
 use crate::compiler::ast::*;
 use crate::opcodes::OpCode;
-use crate::types::*;
 use std::collections::HashMap;
 use ethereum_types::U256;
-use sha3::{Digest, Keccak256};
-
-// Dummy keccak256 function (in practice, use a proper crypto library)
-fn keccak256(data: &[u8]) -> [u8; 32] {
-    // This is a placeholder - in a real implementation, you'd use a proper hash function
-    let mut hash = [0u8; 32];
-    for (i, byte) in data.iter().take(32).enumerate() {
-        hash[i] = *byte;
-    }
-    hash
-}
 
 struct PendingJump {
     push_opcode_pos: usize,  // Position of the PUSH opcode
@@ -442,23 +430,21 @@ impl CodeGenerator {
                                             self.memory_pointer += 1;
                                             
                                             // Process second argument (usually a variable)
-                                            match arg2 {
-                                                _ => {
-                                                    // Variable or expression
-                                                    self.visit_expression(arg2)?;
-                                                    
-                                                    // Convert to ASCII and store (single digit)
-                                                    self.emit_push_u256(U256::from(48)); // ASCII '0'
-                                                    self.stack_depth += 1;
-                                                    self.emit_opcode(OpCode::ADD);
-                                                    self.stack_depth -= 1;
-                                                    
-                                                    self.emit_push_u256(U256::from(self.memory_pointer));
-                                                    self.stack_depth += 1;
-                                                    self.emit_opcode(OpCode::MSTORE8);
-                                                    self.stack_depth -= 2;
-                                                    self.memory_pointer += 1;
-                                                }
+                                            {
+                                                // Variable or expression
+                                                self.visit_expression(arg2)?;
+                                                
+                                                // Convert to ASCII and store (single digit)
+                                                self.emit_push_u256(U256::from(48)); // ASCII '0'
+                                                self.stack_depth += 1;
+                                                self.emit_opcode(OpCode::ADD);
+                                                self.stack_depth -= 1;
+                                                
+                                                self.emit_push_u256(U256::from(self.memory_pointer));
+                                                self.stack_depth += 1;
+                                                self.emit_opcode(OpCode::MSTORE8);
+                                                self.stack_depth -= 2;
+                                                self.memory_pointer += 1;
                                             }
                                             
                                             let total_length = self.memory_pointer - start_offset;
@@ -600,7 +586,7 @@ impl CodeGenerator {
         match variable.name.as_str() {
             "memory" => {
                 // Reading from memory without index -> load from current memory pointer - 32
-                let read_offset = if self.memory_pointer >= 32 { self.memory_pointer - 32 } else { 0 };
+                let read_offset = self.memory_pointer.saturating_sub(32);
                 self.emit_push_u256(U256::from(read_offset));
                 self.stack_depth += 1;
                 self.emit_opcode(OpCode::MLOAD);

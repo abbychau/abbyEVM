@@ -1,0 +1,144 @@
+// AbbyToken - Simple ERC20-like token with staking functionality
+// This demonstrates the Abby token implementation for PoS staking
+
+let totalSupply = 1000000; // 1 million Abby tokens
+let stakingRewardRate = 8; // 8% annual reward
+let minimumStake = 32; // 32 Abby tokens minimum
+
+// Storage layout
+// slot 0: totalSupply
+// slot 1: stakingRewardRate  
+// slot 2: minimumStake
+// slot 1000+: balances[address]
+// slot 2000+: stakes[address]
+// slot 3000+: validators[address]
+
+function initialize() {
+    storage[0] = totalSupply;
+    storage[1] = stakingRewardRate;
+    storage[2] = minimumStake;
+    
+    // Give initial supply to contract deployer
+    let deployerBalance = 1000;
+    storage[deployerBalance] = totalSupply;
+    
+    console.log("AbbyToken initialized with", totalSupply, "tokens");
+    console.log("Staking reward rate:", stakingRewardRate, "%");
+    console.log("Minimum stake:", minimumStake, "tokens");
+}
+
+function stake(amount) {
+    if (amount < minimumStake) {
+        console.log("Error: Minimum stake is", minimumStake, "tokens");
+        return false;
+    }
+    
+    let senderAddr = 1; // Simplified sender address
+    let balanceSlot = 1000 + senderAddr;
+    let stakeSlot = 2000 + senderAddr;
+    
+    let currentBalance = storage[balanceSlot];
+    if (currentBalance < amount) {
+        console.log("Error: Insufficient balance");
+        return false;
+    }
+    
+    // Transfer tokens from balance to stake
+    storage[balanceSlot] = currentBalance - amount;
+    storage[stakeSlot] = storage[stakeSlot] + amount;
+    
+    console.log("Staked", amount, "Abby tokens");
+    console.log("New stake balance:", storage[stakeSlot]);
+    
+    return true;
+}
+
+function unstake(amount) {
+    let senderAddr = 1; // Simplified sender address
+    let balanceSlot = 1000 + senderAddr;
+    let stakeSlot = 2000 + senderAddr;
+    
+    let currentStake = storage[stakeSlot];
+    if (currentStake < amount) {
+        console.log("Error: Insufficient staked amount");
+        return false;
+    }
+    
+    // Transfer tokens from stake back to balance
+    storage[stakeSlot] = currentStake - amount;
+    storage[balanceSlot] = storage[balanceSlot] + amount;
+    
+    console.log("Unstaked", amount, "Abby tokens");
+    console.log("New balance:", storage[balanceSlot]);
+    
+    return true;
+}
+
+function getBalance(addr) {
+    let balanceSlot = 1000 + addr;
+    return storage[balanceSlot];
+}
+
+function getStake(addr) {
+    let stakeSlot = 2000 + addr;
+    return storage[stakeSlot];
+}
+
+function calculateRewards(addr) {
+    let stakeSlot = 2000 + addr;
+    let currentStake = storage[stakeSlot];
+    
+    // Simplified reward calculation (in reality, would factor in time)
+    let rewards = (currentStake * stakingRewardRate) / 100;
+    return rewards;
+}
+
+function claimRewards() {
+    let senderAddr = 1; // Simplified sender address
+    let rewards = calculateRewards(senderAddr);
+    
+    if (rewards > 0) {
+        let balanceSlot = 1000 + senderAddr;
+        storage[balanceSlot] = storage[balanceSlot] + rewards;
+        
+        console.log("Claimed", rewards, "Abby token rewards");
+        console.log("New balance:", storage[balanceSlot]);
+        return true;
+    }
+    
+    console.log("No rewards to claim");
+    return false;
+}
+
+function becomeValidator() {
+    let senderAddr = 1; // Simplified sender address
+    let stakeSlot = 2000 + senderAddr;
+    let validatorSlot = 3000 + senderAddr;
+    
+    let currentStake = storage[stakeSlot];
+    if (currentStake < minimumStake) {
+        console.log("Error: Need at least", minimumStake, "staked tokens to become validator");
+        return false;
+    }
+    
+    storage[validatorSlot] = 1; // Mark as validator
+    console.log("Successfully became validator with", currentStake, "staked tokens");
+    return true;
+}
+
+// Demo execution
+initialize();
+
+// Demo staking flow
+console.log("=== Staking Demo ===");
+stake(50);
+console.log("Current stake:", getStake(1));
+console.log("Current balance:", getBalance(1));
+
+becomeValidator();
+
+let rewards = calculateRewards(1);
+console.log("Potential rewards:", rewards);
+
+claimRewards();
+console.log("Final balance:", getBalance(1));

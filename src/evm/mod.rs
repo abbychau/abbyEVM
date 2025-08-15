@@ -219,6 +219,139 @@ impl EvmExecutor {
             state_changes: HashMap::new(), // TODO: Track state changes
         })
     }
+
+    pub fn execute_transaction(
+        &mut self,
+        tx: &crate::types::Transaction,
+        accounts: &mut HashMap<Address, Account>,
+    ) -> Result<ExecutionResult, String> {
+        // Get sender account
+        let sender_account = accounts.entry(tx.from).or_default();
+        
+        // Check balance (simplified - in a real implementation, this would be more complex)
+        if sender_account.balance < tx.value {
+            return Err("Insufficient balance".to_string());
+        }
+        
+        // Deduct value from sender
+        sender_account.balance -= tx.value;
+        sender_account.nonce += ethereum_types::U256::one();
+        
+        // Create EVM state
+        let mut state = EvmState::new(tx.gas, tx.value);
+        state.caller = tx.from;
+        state.origin = tx.from;
+        state.call_data = tx.data.clone();
+        
+        let initial_gas = state.gas;
+        
+        // Determine execution path
+        let result = if let Some(to_address) = tx.to {
+            // Call existing contract or transfer
+            state.address = to_address;
+            
+            // Get recipient account
+            let recipient_account = accounts.entry(to_address).or_default();
+            recipient_account.balance += tx.value;
+            
+            // If recipient has code, execute it
+            if !recipient_account.code.is_empty() {
+                let bytecode = recipient_account.code.clone();
+                self.execute_bytecode(&bytecode, &mut state)?
+            } else {
+                // Simple transfer
+                ExecutionResult {
+                    status: ExecutionStatus::Success,
+                    gas_used: ethereum_types::U256::from(21000), // Base transaction cost
+                    gas_remaining: state.gas - ethereum_types::U256::from(21000),
+                    return_data: Vec::new(),
+                    logs: Vec::new(),
+                    state_changes: HashMap::new(),
+                }
+            }
+        } else {
+            // Contract creation
+            let contract_address = self.create_contract_address(&tx.from, &sender_account.nonce);
+            state.address = contract_address;
+            
+            // Execute constructor code
+            let result = self.execute_bytecode(&tx.data, &mut state)?;
+            
+            // Store contract code if successful
+            if matches!(result.status, ExecutionStatus::Success) {
+                let contract_account = accounts.entry(contract_address).or_default();
+                contract_account.code = result.return_data.clone();
+                contract_account.balance += tx.value;
+            }
+            
+            result
+        };
+        
+        Ok(result)
+    }
+    
+    fn execute_bytecode(
+        &self,
+        bytecode: &[u8],
+        state: &mut EvmState,
+    ) -> Result<ExecutionResult, String> {
+        let initial_gas = state.gas;
+        
+        while state.pc < bytecode.len() && !state.halted && !state.reverted && state.error.is_none() {
+            let opcode_byte = bytecode[state.pc];
+            let opcode = crate::opcodes::OpCode::from_byte(opcode_byte);
+            
+            // Execute the opcode
+            match crate::opcodes::execute_opcode(&opcode, state, bytecode) {
+                Ok(_) => {
+                    if !matches!(opcode, crate::opcodes::OpCode::JUMP | crate::opcodes::OpCode::JUMPI) && !state.halted {
+                        state.pc += 1;
+                    }
+                }
+                Err(e) => {
+                    state.error = Some(e);
+                    break;
+                }
+            }
+        }
+        
+        let gas_used = initial_gas - state.gas;
+        
+        let status = if let Some(error) = &state.error {
+            if error.contains("Out of gas") {
+                ExecutionStatus::OutOfGas
+            } else {
+                ExecutionStatus::Error(error.clone())
+            }
+        } else if state.reverted {
+            ExecutionStatus::Revert("Execution reverted".to_string())
+        } else {
+            ExecutionStatus::Success
+        };
+        
+        Ok(ExecutionResult {
+            status,
+            gas_used,
+            gas_remaining: state.gas,
+            return_data: state.return_data.clone(),
+            logs: state.logs.clone(),
+            state_changes: HashMap::new(), // TODO: Track state changes
+        })
+    }
+    
+    fn create_contract_address(&self, sender: &Address, nonce: &ethereum_types::U256) -> Address {
+        use sha3::{Digest, Keccak256};
+        
+        let mut hasher = Keccak256::new();
+        hasher.update(sender.as_bytes());
+        
+        let mut nonce_bytes = [0u8; 32];
+        nonce.to_big_endian(&mut nonce_bytes);
+        hasher.update(nonce_bytes);
+        
+        let hash = hasher.finalize();
+        Address::from_slice(&hash[12..])
+    }
 }
 
 #[cfg(test)]
