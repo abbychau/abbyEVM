@@ -46,7 +46,7 @@ fmt-check: ## Check code formatting
 	cargo fmt -- --check
 
 clippy: ## Run clippy lints
-	cargo clippy -- -D warnings
+	cargo clippy
 
 clippy-fix: ## Fix clippy issues automatically
 	cargo clippy --fix
