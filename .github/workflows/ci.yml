@@ -15,30 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
-        profile: minimal
-        override: true
         components: rustfmt, clippy
 
     - name: Cache cargo registry
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
         
     - name: Cache cargo index
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
         
     - name: Cache cargo build
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
@@ -53,30 +50,63 @@ jobs:
       run: cargo fmt -- --check
 
   build:
-    name: Build
+    name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_suffix: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_suffix: ".exe"
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary_suffix: ""
         
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
-        profile: minimal
-        override: true
+        targets: ${{ matrix.target }}
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Build
-      run: cargo build --release --verbose
+      run: cargo build --release --target ${{ matrix.target }} --verbose
 
-    - name: Test examples
+    - name: Upload binary artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: abby_evm-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/abby_evm${{ matrix.binary_suffix }}
+        retention-days: 30
+
+    - name: Test examples (Linux only)
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        cargo run --release -- execute --example simple-add
-        cargo run --release -- execute --example simple-mul
-        cargo run --release -- analyze --bytecode "6001600201"
+        cargo run --release --target ${{ matrix.target }} -- execute --example simple-add
+        cargo run --release --target ${{ matrix.target }} -- execute --example simple-mul
+        cargo run --release --target ${{ matrix.target }} -- analyze --bytecode "6001600201"
 
   integration-test:
     name: Integration Tests
@@ -84,14 +114,10 @@ jobs:
     needs: [test, build]
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
+      uses: dtolnay/rust-toolchain@stable
 
     - name: Run integration tests
       run: |

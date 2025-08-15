@@ -68,6 +68,10 @@ AbbyEVM includes a simple blockchain implementation that allows users to deploy 
 
 [Documentation](./BLOCKCHAIN.md)
 
+## Binaries
+
+[Release](https://github.com/abbychau/abbyEVM/releases) or [GitHub Actions](https://github.com/abbychau/abbyEVM/actions)
+
 ## License
 
 MIT License

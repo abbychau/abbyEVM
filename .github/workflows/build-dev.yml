@@ -1,0 +1,56 @@
+name: Build Development Binaries
+
+on:
+  push:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-dev:
+    name: Build Development Binary
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build release binary
+      run: cargo build --release
+
+    - name: Create binary info
+      run: |
+        echo "Binary built at: $(date)" > binary_info.txt
+        echo "Commit: ${{ github.sha }}" >> binary_info.txt
+        echo "Branch: ${{ github.ref_name }}" >> binary_info.txt
+        ./target/release/abby_evm --version >> binary_info.txt
+
+    - name: Upload development binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: abby_evm-dev-${{ github.sha }}
+        path: |
+          target/release/abby_evm
+          binary_info.txt
+        retention-days: 7
